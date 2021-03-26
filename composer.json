@@ -1,22 +1,17 @@
 {
-    "name": "laravel-zero/laravel-zero",
-    "description": "The Laravel Zero Framework.",
-    "keywords": ["framework", "laravel", "laravel zero", "console", "cli"],
-    "homepage": "https://laravel-zero.com",
+    "name": "talboterie/dynamic-ip-cloudflare",
+    "description": "Update Cloudflare DNS with Dynamic IP",
+    "keywords": ["cloudflare", "ip", "dynamic"],
     "type": "project",
     "license": "MIT",
-    "support": {
-        "issues": "https://github.com/laravel-zero/laravel-zero/issues",
-        "source": "https://github.com/laravel-zero/laravel-zero"
-    },
     "authors": [
         {
-            "name": "Nuno Maduro",
-            "email": "enunomaduro@gmail.com"
+            "name": "Vincent Talbot",
+            "email": "vincent@talbot.ninja"
         }
     ],
     "require": {
-        "php": "^7.3|^8.0",
+        "php": "^7.4|^8.0",
         "cloudflare/sdk": "^1.1",
         "laravel-zero/framework": "^8.4"
     },
