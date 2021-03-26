@@ -17,6 +17,7 @@
     ],
     "require": {
         "php": "^7.3|^8.0",
+        "cloudflare/sdk": "^1.1",
         "laravel-zero/framework": "^8.4"
     },
     "require-dev": {
