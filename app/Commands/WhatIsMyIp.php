@@ -9,6 +9,8 @@ use LaravelZero\Framework\Commands\Command;
 
 class WhatIsMyIp extends Command
 {
+    use Configurable;
+
     protected $signature = 'what-is-my-ip';
 
     protected $description = 'What is my IP';
@@ -18,30 +20,28 @@ class WhatIsMyIp extends Command
     public function handle(Filesystem $filesystem): int
     {
         return $this
+            ->ensureConfigured($filesystem)
             ->fetchCurrentIP()
-            ->saveIP($filesystem) ? 0 : 1;
+            ->saveConfig($filesystem) ? 0 : 1;
     }
 
     protected function fetchCurrentIP(): self
     {
         $client = new Client([
-            'base_uri' => 'https://wtfismyip.com/'
+            'base_uri' => 'https://wtfismyip.com/',
         ]);
 
-        $this->ip = $client->get('/text')->getBody()->getContents();
+        $ip = trim($client->get('/text')->getBody()->getContents());
+
+        $this->config['update'] = $ip !== ($this->config['ip'] ?? 0);
+
+        $this->config['ip'] = $ip;
 
         return $this;
     }
 
-    protected function saveIP(Filesystem $filesystem): bool
-    {
-        $filesystem->put('ip.txt', $this->ip);
-
-        return true;
-    }
-
     public function schedule(Schedule $schedule): void
     {
-        $schedule->command(static::class)->everyFiveMinutes();
+        $schedule->command(static::class)->everyMinute();
     }
 }

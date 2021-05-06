@@ -11,9 +11,11 @@
         }
     ],
     "require": {
-        "php": "^7.4|^8.0",
+        "php": "^8.0",
         "cloudflare/sdk": "^1.1",
-        "laravel-zero/framework": "^8.4"
+        "hmazter/laravel-schedule-list": "^2.2.1",
+        "laravel-zero/framework": "^8.4",
+        "symfony/yaml": "^5.2"
     },
     "require-dev": {
         "mockery/mockery": "^1.4.2",
