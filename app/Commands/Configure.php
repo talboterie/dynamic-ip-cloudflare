@@ -35,7 +35,6 @@ class Configure extends Command
             ->validateToken()
             ->gatherDomains()
             ->validateDomains()
-            ->fetchIP()
             ->saveConfig($filesystem) ? 0 : 1;
     }
 
@@ -110,13 +109,6 @@ class Configure extends Command
         }
 
         $this->config['domains'] = $data;
-
-        return $this;
-    }
-
-    protected function fetchIP(): self
-    {
-        $this->call('what-is-my-ip');
 
         return $this;
     }
