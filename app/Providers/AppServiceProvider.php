@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Configuration;
 use Cloudflare\API\Adapter\Guzzle;
 use Cloudflare\API\Auth\APIKey;
 use Illuminate\Support\ServiceProvider;

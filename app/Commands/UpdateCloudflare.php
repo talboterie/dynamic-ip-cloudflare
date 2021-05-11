@@ -5,7 +5,6 @@ namespace App\Commands;
 use Cloudflare\API\Adapter\Guzzle;
 use Cloudflare\API\Endpoints\DNS;
 use Illuminate\Console\Scheduling\Schedule;
-use Illuminate\Filesystem\Filesystem;
 use LaravelZero\Framework\Commands\Command;
 
 class UpdateCloudflare extends Command
@@ -16,14 +15,14 @@ class UpdateCloudflare extends Command
 
     protected $description = 'Update Cloudflare';
 
-    public function handle(Filesystem $filesystem): int
+    public function handle(): int
     {
         $this
-            ->ensureConfigured($filesystem)
+            ->ensureConfigured()
             ->syncEntriesWithIp();
     }
 
-    protected function syncEntriesWithIp(): self
+    private function syncEntriesWithIp(): self
     {
         if (!$this->config['update']) {
             return $this;

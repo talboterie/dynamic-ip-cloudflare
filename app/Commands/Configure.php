@@ -14,7 +14,7 @@ class Configure extends Command
 {
     use Configurable;
 
-    protected $signature = 'configure';
+    protected $signature = 'configure {--domains : Domains to update}';
 
     protected $description = 'Configure tool';
 
@@ -29,16 +29,14 @@ class Configure extends Command
     public function handle(Filesystem $filesystem): int
     {
         return $this
-            ->ensureNotConfigured($filesystem)
+            ->ensureNotConfigured()
             ->gatherEmail()
             ->gatherApiKey()
             ->validateToken()
-            ->gatherDomains()
-            ->validateDomains()
             ->saveConfig($filesystem) ? 0 : 1;
     }
 
-    protected function gatherEmail(): self
+    private function gatherEmail(): self
     {
         $this->email = $this->ask('Enter your email address');
 
@@ -46,12 +44,12 @@ class Configure extends Command
             return $this->gatherEmail();
         }
 
-        $this->config['auth']['email'] = $this->email;
+        $this->config->auth(email: $this->email);
 
         return $this;
     }
 
-    protected function gatherApiKey(): self
+    private function gatherApiKey(): self
     {
         $this->apiKey = $this->secret('Enter your Cloudflare API Key');
 
@@ -59,12 +57,12 @@ class Configure extends Command
             return $this->gatherApiKey();
         }
 
-        $this->config['auth']['api_key'] = $this->apiKey;
+        $this->config->auth(key: $this->apiKey);
 
         return $this;
     }
 
-    protected function validateToken(): self
+    private function validateToken(): self
     {
         $key = new APIKey($this->email, $this->apiKey);
         $adapter = new Guzzle($key);
@@ -75,41 +73,5 @@ class Configure extends Command
         }
 
         throw new RuntimeException('Email or API Key not valid');
-    }
-
-    protected function gatherDomains(): self
-    {
-        $domain = $this->ask('Provide a domain to update');
-
-        if (empty($domain)) {
-            return $this;
-        }
-
-        $this->domains[] = $domain;
-
-        return $this->gatherDomains();
-    }
-
-    protected function validateDomains(): self
-    {
-        $key = new APIKey($this->email, $this->apiKey);
-        $adapter = new Guzzle($key);
-
-        $data = [];
-
-        foreach ($this->domains as $domain) {
-            $zone = (new Zones($adapter))->listZones($domain);
-
-            foreach ($zone->result as $zone) {
-                $data[$domain] = [
-                    'id'    => $zone->id,
-                    'entry' => [],
-                ];
-            }
-        }
-
-        $this->config['domains'] = $data;
-
-        return $this;
     }
 }

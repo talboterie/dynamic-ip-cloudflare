@@ -20,12 +20,12 @@ class WhatIsMyIp extends Command
     public function handle(Filesystem $filesystem): int
     {
         return $this
-            ->ensureConfigured($filesystem)
+            ->ensureConfigured()
             ->fetchCurrentIP()
             ->saveConfig($filesystem) ? 0 : 1;
     }
 
-    protected function fetchCurrentIP(): self
+    private function fetchCurrentIP(): self
     {
         $client = new Client([
             'base_uri' => 'https://wtfismyip.com/',

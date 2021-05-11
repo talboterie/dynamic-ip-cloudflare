@@ -20,25 +20,25 @@ class SelectEntries extends Command
     public function handle(Filesystem $filesystem): int
     {
         return $this
-            ->ensureConfigured($filesystem)
+            ->ensureConfigured()
             ->fetchEntries()
             ->selectEntries()
             ->ensureEntriesExist()
             ->saveConfig($filesystem) ? 0 : 1;
     }
 
-    protected function fetchEntries(): self
+    private function fetchEntries(): self
     {
         $guzzle = $this->app->make(Guzzle::class);
 
-        foreach ($this->config['domains'] as $domain => $data) {
+        foreach ($this->config->domains() as $domain => $data) {
             $this->entries[$domain] = (new DNS($guzzle))->listRecords($data['id'])->result;
         }
 
         return $this;
     }
 
-    protected function selectEntries(): self
+    private function selectEntries(): self
     {
         foreach ($this->entries as $domain => $entries) {
             $records = collect($entries)
@@ -47,26 +47,36 @@ class SelectEntries extends Command
                 })
                 ->mapWithKeys(function ($entry) {
                     return [$entry->id => "{$entry->type}: {$entry->name} ({$entry->content})"];
-                })
+                });
+
+            $choices = $records->values()->all();
+            $ids = $records->flip();
+
+            $choices[] = 'Create a new A entry';
+
+            $answers = $this->choice("Select entries for [{$domain}] to keep updated", $choices, multiple: true);
+
+            $ids = $ids->filter(fn($item, $index) => in_array($index, $answers))
+                ->values()
                 ->all();
 
-            $records[0] = 'Create a new A entry';
+            if (in_array('Create a new A entry', $answers)) {
+                $ids[] = '0';
+            }
 
-            $choices = $this->choice("Select entries for [{$domain}] to keep updated", $records, multiple: true);
-
-            $this->config['domains'][$domain]['entry'] = $choices;
+            $this->config['domains'][$domain]['entry'] = $ids;
         }
 
         return $this;
     }
 
-    protected function ensureEntriesExist(): self
+    private function ensureEntriesExist(): self
     {
         $dns = new DNS($this->app->make(Guzzle::class));
 
         foreach ($this->config['domains'] as $domain => $data) {
             foreach ($data['entry'] as &$entry) {
-                if ($entry === '0' || $entry === 'Create a new A entry') {
+                if ($entry === '0') {
                     $name = $this->ask("Which domain name should be used for the new A entry for {$domain}?");
                     $dns->addRecord($data['id'], 'A', $name, $this->config['ip']);
 
